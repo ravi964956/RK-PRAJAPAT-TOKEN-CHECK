@@ -6,51 +6,35 @@
     <title>FB TOKEN CHECKER - PRO - RAVI KUMAR</title>
     <style>
         body { background: #0f0f0f; color: #ffffff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; text-align: center; }
-        
-        /* Profile DP Styling */
-        .profile-dp-container { margin: 20px auto; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #FFD700; overflow: hidden; box-shadow: 0 0 20px #FFD700; }
+        .profile-dp-container { margin: 20px auto; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #FFD700; overflow: hidden; box-shadow: 0 0 20px #FFD700; transition: 0.5s; }
         .profile-dp-container img { width: 100%; height: 100%; object-fit: cover; }
-        
         .header { color: #FFD700; font-size: 26px; font-weight: bold; text-shadow: 0 0 10px #FFD700; }
         .sub-header { color: #00d2ff; font-size: 13px; margin-bottom: 5px; letter-spacing: 2px; font-weight: bold;}
-        
-        /* Uptime Badge */
         #uptime-badge { background: #000; color: #fff; border: 1px solid #FF3366; display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 11px; margin-bottom: 25px; font-weight: bold; }
-        
         .container { background: #1a1a1a; max-width: 500px; margin: auto; padding: 20px; border-radius: 20px; border: 2px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
         textarea { width: 100%; height: 120px; background: #000; color: #00ff00; border: 1px solid #444; border-radius: 10px; padding: 10px; box-sizing: border-box; font-family: monospace; font-size: 12px;}
-        
         button { background: linear-gradient(45deg, #FF3366, #ffae00); color: #fff; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 15px; transition: 0.3s; }
         button:hover { transform: scale(1.02); box-shadow: 0 0 15px #FF3366; }
-        
         #results { margin-top: 25px; text-align: left; }
-        
-        /* Result Card styling with DP */
         .result-card { background: #222; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; animation: fadeIn 0.5s ease; position: relative; display: flex; align-items: center; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .result-status { position: absolute; top: 10px; right: 10px; font-size: 12px; font-weight: bold; }
-        
-        /* Result Profile Pic */
         .result-pic-container { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #fff; overflow: hidden; margin-right: 15px; }
         .result-pic-container img { width: 100%; height: 100%; object-fit: cover; }
-        
         .result-info { font-size: 13px; line-height: 1.6; color: #ccc; }
         .result-info b { color: #fff; }
-        
         .dead-card { background: #1a0000; border-color: #e74c3c; display: block;}
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body>
+<body id="main-body">
     
-    <div class="profile-dp-container">
-        <img src="https://i.postimg.cc/4xqSYF3V/IMG-20260306-225423.png" alt="Ravi Kumar DP">
+    <div id="auth-check">
+        <div class="profile-dp-container" id="user-dp">
+            <img src="https://i.postimg.cc/4xqSYF3V/IMG-20260306-225423.png" alt="Ravi Kumar DP">
+        </div>
+        <div class="header" id="user-name">MR. RAVI KUMAR PRAJAPAT</div>
     </div>
-    
-    <div class="header">MR. RAVI KUMAR PRAJAPAT</div>
+
     <div class="sub-header">PRO FB TOKEN CHECKER</div>
-    
     <div id="uptime-badge">⏳ Server Uptime: Loading...</div>
 
     <div class="container">
@@ -60,22 +44,43 @@
     </div>
 
     <script>
-        // Update Uptime every 5 seconds
+        // --- 🔒 ENCRYPTION & OWNER LOCK SYSTEM 🔒 ---
+        const _O = "TVIuIFJBVkkgS1VNQVIgUFJBSkFQQVQ="; // Owner Name Encrypted
+        const _I = "aHR0cHM6Ly9pLnBvc3RpbWcuY2MvNHhxU1lGM1YvSU1HLTIwMjYwMzA2LTIyNTQyMy5wbmc="; // DP Link Encrypted
+
+        function verifyLock() {
+            const n = document.getElementById('user-name');
+            const d = document.querySelector('#user-dp img');
+            if (n.innerText !== atob(_O) || d.src !== atob(_I)) {
+                document.getElementById('main-body').innerHTML = "<h1 style='color:red; margin-top:100px;'>🛑 SECURITY VIOLATION: CODE TAMPERED!<br>Owner: MR. RAVI KUMAR PRAJAPAT</h1>";
+                return false;
+            }
+            return true;
+        }
+        
+        // Anti-Right Click & Inspect Element
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0))) return false;
+        }
+
+        setInterval(verifyLock, 3000);
+
         function updateUptime() {
             fetch('/api/stats').then(res => res.json()).then(data => {
                 document.getElementById('uptime-badge').innerText = "⏳ Server Uptime: " + data.uptime;
-            });
+            }).catch(e => { document.getElementById('uptime-badge').innerText = "⏳ Server Live"; });
         }
         updateUptime();
         setInterval(updateUptime, 5000);
 
         async function checkTokens() {
+            if(!verifyLock()) return;
             const input = document.getElementById('tokenInput').value;
             const resDiv = document.getElementById('results');
             const btn = document.getElementById('btnText');
             
             if(!input.trim()) return alert("Please paste some tokens first!");
-
             resDiv.innerHTML = "<p style='text-align:center;'>Processing Tokens... Please wait ⏳</p>";
             btn.disabled = true;
 
@@ -86,37 +91,29 @@
                     body: JSON.stringify({tokens: input})
                 });
                 const data = await response.json();
-                
                 resDiv.innerHTML = "";
                 data.forEach(item => {
                     if (item.status.includes("Live")) {
                         resDiv.innerHTML += `
                         <div class="result-card">
-                            <span class="result-status" style="color: ${item.color}">${item.status}</span>
-                            <div class="result-pic-container">
-                                <img src="${item.profile_pic}" alt="${item.name}">
-                            </div>
+                            <span class="result-status" style="position:absolute; top:10px; right:10px; font-size:12px; font-weight:bold; color: ${item.color}">${item.status}</span>
+                            <div class="result-pic-container"><img src="${item.profile_pic}" alt="DP"></div>
                             <div class="result-info">
-                                <b>👤 Profile Name:</b> ${item.name}<br>
-                                <b>🆔 ID UID:</b> ${item.uid}<br>
-                                <b>📧 Gmail YA Number:</b> ${item.email}<br>
-                                <b>🎂 Date Of Birth:</b> ${item.dob}<br>
+                                <b>👤 Name:</b> ${item.name}<br>
+                                <b>🆔 UID:</b> ${item.uid}<br>
+                                <b>📧 Info:</b> ${item.email}<br>
+                                <b>🎂 DOB:</b> ${item.dob}<br>
                             </div>
                         </div>`;
                     } else {
                         resDiv.innerHTML += `
                         <div class="result-card dead-card">
-                            <span class="result-status" style="color: ${item.color}">${item.status}</span>
-                            <div class="result-info">
-                                <b style="color:#e74c3c">Error:</b> ${item.message}<br>
-                                <small style="color:#666">${item.token}</small>
-                            </div>
+                            <span class="result-status" style="position:absolute; top:10px; right:10px; font-size:12px; font-weight:bold; color: ${item.color}">${item.status}</span>
+                            <div class="result-info"><b style="color:#e74c3c">Error:</b> ${item.message}</div>
                         </div>`;
                     }
                 });
-            } catch (err) {
-                resDiv.innerHTML = "<p style='color:red;'>Server Error! Check Render Logs.</p>";
-            }
+            } catch (err) { resDiv.innerHTML = "<p style='color:red;'>Server Error!</p>"; }
             btn.disabled = false;
         }
     </script>
